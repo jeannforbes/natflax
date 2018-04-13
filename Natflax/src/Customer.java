@@ -5,23 +5,18 @@ import java.util.Scanner;
 public class Customer {
 
     private String CID, user, password, name[], address, bday, phone, payment[];
-    private ArrayList<String> rentalList;
+    public ArrayList<String> rentalList;
 
     public Customer(String CID, String user, String password, String fname, String lname, String address, String bday,
                     String phone, String cc, String ccExp, String ccSec, ArrayList<String> rentalList){
-        this.name = new String[2];
-        this.payment = new String[3];
         this.CID = CID;
         this.user = user;
         this.password = password;
-        this.name[0] = fname;
-        this.name[1] = lname;
+        this.name = new String[]{fname,lname};
         this.address = address;
         this.bday = bday;
         this.phone = phone;
-        this.payment[0] = cc;
-        this.payment[1] = ccExp;
-        this.payment[2] = ccSec;
+        this.payment = new String[]{cc,ccExp,ccSec};
         this.rentalList = rentalList;
 
     }
@@ -148,7 +143,7 @@ public class Customer {
     }
 
     private String custID(){
-        String CID="";
+        String CID="1";
         //SQL create an ID?
         return CID;
     }

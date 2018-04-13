@@ -5,6 +5,7 @@ import java.util.*;
 
 public class Natflax {
 
+    static Store store;
     public static void main(String[] args){
         //Connection conn = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
         //Statement statement = conn.createStatement();
@@ -17,7 +18,8 @@ public class Natflax {
         ResultSet result = queryDB(conn, "SELECT * FROM Employees");
         System.out.println(result);
 */
-
+        store = new Store("1","123 place","(132)123-1593","123-45-6789",
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>() );
         startDBQuery();
 //        conn.close();
     }
@@ -40,25 +42,20 @@ public class Natflax {
                 "Are you a(n):\n" +
                 "\t1-Customer\n" +
                 "\t2-Employee\n" +
-                "\t3-New\n" +
-                "\t4-Quit");
+                "\t3-Manager\n" +
+                "\t4-New\n" +
+                "\t5-Quit");
         Scanner in = new Scanner(System.in);
         try {
             int login = in.nextInt();
+            if(login == 1 | login == 2 | login == 3)
+                login(login);
             switch(login){
-                case(1):
-                    //Customer login
-                    customerLogin();
-                    break;
-                case(2):
-                    //Employee login
-                    Employee();
-                    break;
-                case(3):
+                case(4):
                     //Create new login
                     CreateNewCustomer();
                     break;
-                case(4):
+                case(5):
                     System.out.println("Goodbye!");
                     break;
                 default:
@@ -79,23 +76,75 @@ public class Natflax {
         //customerLogin() //when it's implemented
     }
 
-    private static void customerLogin(){
+
+    private static void login(int action){
         System.out.println("Please log in.");
-        System.out.println("Enter username:3");
+        System.out.println("Enter username:");
         Scanner in = new Scanner(System.in);
         try {
             String user = in.next();
             System.out.println("Enter Password:");
             String pw = in.next();
-            Customer sample = new Customer("1","user","password","Fname","Lname",
-                    "123 Sample St, Place JE, 12345","01/01/1900","(123)456-7890",
-                    "1234123412341234","01/20","123", new ArrayList<String>());
             //actually log in somehow or whatever
             //if(logged in) c = customer that exists somehow
-            customerActions(sample);
+            switch(action){
+                case(1):
+                    Customer sampleC = new Customer("1","user","password","Fname","Lname",
+                        "123 Sample St, Place JE, 12345","01/01/1900","(123)456-7890",
+                        "1234123412341234","01/20","123", new ArrayList<String>());
+                    customerActions(sampleC);
+                    break;
+                case(2):
+                    Employee sampleE = new Employee("123-45-6789","user","password","Fname","Lname",
+                            "123 Sample St, Place JE, 12345","(123)456-7890","1");
+                    employeeActions(sampleE);
+                    break;
+                case(3):
+                    Employee sampleM = new Employee("123-45-6789","user","password","Fname","Lname",
+                        "123 Sample St, Place JE, 12345","(123)456-7890","1");
+                    managerActions(sampleM);
+                    break;
+            }
         }catch (InputMismatchException e){
             System.out.println("Input not in correct format, try again.");
-            customerLogin();
+            login(action);
+        }
+    }
+
+    private static void managerActions(Employee m){
+        System.out.println("What would you like to do?\n" +
+                "\t1-Return book\n" +
+                "\t2-Add book\n" +
+                "\t3-Edit Information\n" +
+                "\t4-Add Employee\n" +
+                "\t5-Fire Employee\n" +
+                "\t6-Quit");
+        Scanner in = new Scanner(System.in);
+        int action = in.nextInt();
+        switch(action){
+            case(1):
+                break;
+            case(2):
+                break;
+            case(3):
+                break;
+            case(4):
+                System.out.println("Fill out your information:");
+                Employee e = new Employee();
+                store.employees.add(e);
+                break;
+            case(5):
+                System.out.println("Enter ssn of Employee to fire:");
+                //SQL SELECT Employee with that ssn = e
+//                store.employees.remove(e);
+                break;
+            case(6):
+                System.out.println("Goodbye!");
+                break;
+            default:
+                System.out.println("Command not recognized");
+                managerActions(m);
+                break;
         }
     }
 
@@ -148,10 +197,12 @@ public class Natflax {
     }
 
 
-    private static void Employee(){
-        System.out.println("Whatchu wan do?\n" +
+    private static void employeeActions(Employee e){
+        System.out.println("What would you like to do?\n" +
                 "\t1-Return book\n" +
-                "\t2-idk whatever else");
+                "\t2-Add book\n" +
+                "\t3-Edit Information\n" +
+                "\t4-Quit");
         Scanner in = new Scanner(System.in);
         int action = in.nextInt();
         switch(action){
@@ -159,7 +210,14 @@ public class Natflax {
                 break;
             case(2):
                 break;
+            case(3):
+                break;
+            case(4):
+                System.out.println("Goodbye!");
+                break;
             default:
+                System.out.println("Command not recognized");
+                employeeActions(e);
                 break;
         }
     }
