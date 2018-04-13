@@ -73,13 +73,15 @@ public class Natflax {
     }
 
     private static void CreateNewCustomer() {
+        System.out.println("Welcome! Please fill out some basic information.");
         Customer c = new Customer();
-        customerActions(c);
+        customerActions(c);//for now
+        //customerLogin() //when it's implemented
     }
 
     private static void customerLogin(){
         System.out.println("Please log in.");
-        System.out.println("Enter username:");
+        System.out.println("Enter username:3");
         Scanner in = new Scanner(System.in);
         try {
             String user = in.next();

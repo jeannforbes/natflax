@@ -95,8 +95,15 @@ public class Customer {
                         "\n -1 to cancel or any key to continue");
                 if(in.next().equals("-1")) updateCustInfo();
                 String[] pmt = paymentMethod();
+                this.payment = pmt;
                 //SQL UPDATE 0 = ccNum, 1 = exp, 2 = sec
+                System.out.println("Payment method updated to: " +
+                        pmt[0]+"\n" +
+                        pmt[1]+"\n" +
+                        pmt[2]);
                 updateCustInfo();
+                break;
+            case(6):
                 break;
             default:
                 System.out.println("Command not recognized");
