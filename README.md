@@ -2,7 +2,8 @@
 Database management software for a book and movie rental store.
 
 ## Database Creation SQL
-```CREATE TABLE Employee (ID varchar(50) PRIMARY KEY, firstName varchar(20) NOT NULL, lastName varchar(20) NOT NULL, phone nchar(20), hours float NOT NULL, wage decimal(10,2) NOT NULL);
+```
+CREATE TABLE Employee (ID varchar(50) PRIMARY KEY, firstName varchar(20) NOT NULL, lastName varchar(20) NOT NULL, phone nchar(20), hours float NOT NULL, wage decimal(10,2) NOT NULL);
 
 CREATE TABLE Store (SID varchar(50) PRIMARY KEY, address varchar(100) NOT NULL, phone nchar(20) NOT NULL, manager_ID varchar(50), FOREIGN KEY (manager_ID) REFERENCES Employee(ID));
 
