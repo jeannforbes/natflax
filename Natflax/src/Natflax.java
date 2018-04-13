@@ -4,6 +4,7 @@ import java.util.*;
 
 
 public class Natflax {
+
     public static void main(String[] args){
         //Connection conn = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
         //Statement statement = conn.createStatement();
@@ -16,6 +17,7 @@ public class Natflax {
         ResultSet result = queryDB(conn, "SELECT * FROM Employees");
         System.out.println(result);
 */
+
         startDBQuery();
 //        conn.close();
     }
@@ -72,23 +74,30 @@ public class Natflax {
 
     private static void CreateNewCustomer() {
         Customer c = new Customer();
-        Customer(c);
+        customerActions(c);
     }
 
     private static void customerLogin(){
         System.out.println("Please log in.");
         System.out.println("Enter username:");
         Scanner in = new Scanner(System.in);
-        String user = in.next();
-        System.out.println("Enter Password:");
-        String pw = in.next();
-        Customer c = new Customer();
-        //actually log in somehow or whatever
-        //if(logged in) c = customer that exists somehow
-        Customer(c);
+        try {
+            String user = in.next();
+            System.out.println("Enter Password:");
+            String pw = in.next();
+            Customer sample = new Customer("1","user","password","Fname","Lname",
+                    "123 Sample St, Place JE, 12345","01/01/1900","(123)456-7890",
+                    "1234123412341234","01/20","123", new ArrayList<String>());
+            //actually log in somehow or whatever
+            //if(logged in) c = customer that exists somehow
+            customerActions(sample);
+        }catch (InputMismatchException e){
+            System.out.println("Input not in correct format, try again.");
+            customerLogin();
+        }
     }
 
-    private static void Customer(Customer c) {
+    private static void customerActions(Customer c) {
         System.out.println("What can we help you with?:\n" +
                 "\t1-Search\n" +
                 "\t2-Edit Information\n" +
@@ -101,29 +110,38 @@ public class Natflax {
                 case (1):
                     System.out.println("Input search keyword:");
                     String search = in.next();
-                    //SQL search (search) FROM BOOKS, MOVIES
-                    System.out.println("I searched for:" + search + "\n");
-                    Customer(c);
+                    //SQL search (search) FROM BOOKS, MOVIES = results, limit to 10 results bc its easier, or not just
+                    //change that later
+                    String[] results = new String[]{"book1","book2","book3"};
+                    System.out.println("I searched for:" + search + "\n");//
+                    System.out.println("Would you like to check out a title? (yes/no)");
+                    String response = in.next();
+                    if(response.equals("yes"))
+                        c.checkOut(results);
+                    else if(response.equals("no"))
+                        customerActions(c);
+                    else System.out.println("not recognized, assuming no");
+                        customerActions(c);
                     break;
                 case (2):
                     c.updateCustInfo();
-                    Customer(c);
+                    customerActions(c);
                     break;
                 case (3):
                     c.checkRentals();
-                    Customer(c);
+                    customerActions(c);
                     break;
                 case (4):
                     System.out.println("Goodbye!");
                     break;
                 default:
                     System.out.println("Command not recognized");
-                    Customer(c);
+                    customerActions(c);
                     break;
             }
         }catch (InputMismatchException e){
             System.out.println("Input not in right format, try again.");
-            Customer(c);
+            customerActions(c);
         }
     }
 
