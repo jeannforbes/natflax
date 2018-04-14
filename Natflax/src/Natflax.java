@@ -1,77 +1,32 @@
 import java.sql.*;
 import java.util.*;
-//import org.h2.*;
+import org.h2.*;
 
 
 public class Natflax {
 
     static Store store;
-    public static void main(String[] args){
+    public static void main(String[] args)
+        throws Exception{
         //Connection conn = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
         //Statement statement = conn.createStatement();
         //statement.executeQuery("SELECT * FROM Employees");
-        Connection conn = connectToDatabase(
+        Database.connectToDatabase(
                 "jdbc:h2:~/test",
                 "natflax",
                 "admin");
 
-        ResultSet result = queryDB(conn, "SELECT * FROM Employee");
-        System.out.println(result);
+        ResultSet result = Database.queryDB("SELECT * FROM Employee");
 
         store = new Store("1","123 place","(132)123-1593","123-45-6789",
                 new ArrayList<>(), new ArrayList<>(), new ArrayList<>() );
         startDBQuery();
+        Database.close();
 //        conn.close();
     }
-
-    // Handles connecting to the database
-    public static Connection connectToDatabase(String url, String user, String pass)
-            throws Exception{
-        return DriverManager.getConnection(url, user, pass);
-    }
-
-    // Returns a result set for the given SQL query
-    public static ResultSet queryDB(Connection conn, String query)
-            throws Exception{
-        Statement statement = conn.createStatement();
-        return statement.executeQuery(query);
-    }
     
-    public static void printResultSet(ResultSet result)
-            throws Exception
-    {
-        if(result.first() == false)
-        {
-            System.out.println("No tuples found");
-        }
-        else
-        {
-            // Gather column information of the results:
-            ResultSetMetaData meta_data = result.getMetaData();
-            int columns = meta_data.getColumnCount();
-
-            // Create a format string based on the column width of each result column
-            String[] format = new String[columns];
-            for(int i = 0; i < columns; i++)
-            {
-                format[i] = "%-" + (meta_data.getColumnDisplaySize(i+1) + 1) + "s";
-                System.out.format(format[i], meta_data.getColumnName(i+1));
-            }
-            System.out.print("\n");
-            
-            // Print out every single tuple of the query
-            do
-            {
-                for(int i = 0; i < columns; i++)
-                {
-                    System.out.format(format[i], result.getString(i+1));
-                }
-                System.out.print("\n");
-            } while(result.next() != false);
-        }
-    }
-    
-    private static void startDBQuery(){
+    private static void startDBQuery()
+        throws Exception{
         System.out.println("Welcome to NATFLAX!\n" +
                 "Are you a(n):\n" +
                 "\t1-Customer\n" +
@@ -111,22 +66,49 @@ public class Natflax {
     }
 
 
-    private static void login(int action){
+    private static void login(int action)
+        throws Exception{
         System.out.println("Please log in.");
         System.out.println("Enter username:");
         Scanner in = new Scanner(System.in);
         try {
             String user = in.next();
-            System.out.println("Enter Password:");
-            String pw = in.next();
             //actually log in somehow or whatever
             //if(logged in) c = customer that exists somehow
             switch(action){
                 case(1):
-                    Customer sampleC = new Customer("1","user","password","Fname","Lname",
-                        "123 Sample St, Place JE, 12345","01/01/1900","(123)456-7890",
-                        "1234123412341234","01/20","123", new ArrayList<String>());
-                    customerActions(sampleC);
+                    ResultSet user_query = Database.queryDB("SELECT * FROM Customer WHERE username = '" + user + "'");
+                    if(user_query.first() == false)
+                    {
+                        System.out.println("Login failed - user " + user + " not found");
+                        login(action);
+                    }
+                    else
+                    {
+                        Customer sampleC;
+                        int columns = user_query.getMetaData().getColumnCount();
+                        String[] info = new String[columns];
+                        for(int i = 0; i < columns; i++)
+                        {
+                            info[i] = user_query.getString(i+1);
+                        }
+                        ResultSet cc_query = Database.queryDB("SELECT P.ccNumber, P.ccExpiration, P.ccPIN, P.ccSecurity FROM Customer natural join Payment as P WHERE Customer.username = '" + user + "'");
+                        if(cc_query.first() == true)
+                        {
+                            columns = cc_query.getMetaData().getColumnCount();
+                            String[] cc_info = new String[columns];
+                            for(int i = 0; i < columns; i++)
+                            {
+                                cc_info[i] = cc_query.getString(i+1);
+                            }
+                            sampleC = new Customer(info, cc_info);
+                        }
+                        else
+                        {
+                            sampleC = new Customer(info);
+                        }
+                        customerActions(sampleC);
+                    }
                     break;
                 case(2):
                     Employee sampleE = new Employee("123-45-6789","user","password","Fname","Lname",

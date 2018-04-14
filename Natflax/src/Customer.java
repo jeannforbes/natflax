@@ -8,7 +8,7 @@ public class Customer {
     public ArrayList<String> rentalList;
 
     public Customer(String CID, String user, String password, String fname, String lname, String address, String bday,
-                    String phone, String cc, String ccExp, String ccSec, ArrayList<String> rentalList){
+                    String phone, String cc, String ccExp, String ccPin, String ccSec, ArrayList<String> rentalList){
         this.CID = CID;
         this.user = user;
         this.password = password;
@@ -16,9 +16,27 @@ public class Customer {
         this.address = address;
         this.bday = bday;
         this.phone = phone;
-        this.payment = new String[]{cc,ccExp,ccSec};
-        this.rentalList = rentalList;
+        this.payment = new String[]{cc,ccExp,ccPin,ccSec};
 
+    }
+    public Customer(String[] info, String[] cc_info){
+        this.CID = info[0];
+        this.user = info[1];
+        this.password = info[2];
+        this.name = new String[]{info[3],info[4]};
+        this.address = info[5];
+        this.bday = info[6];
+        this.phone = info[7];
+        this.payment = new String[]{cc_info[0],cc_info[1],cc_info[2],cc_info[3]};
+    }
+    public Customer(String[] info){
+        this.CID = info[0];
+        this.user = info[1];
+        this.password = info[2];
+        this.name = new String[]{info[3],info[4]};
+        this.address = info[5];
+        this.bday = info[6];
+        this.phone = info[7];
     }
 
     public Customer(){
@@ -30,7 +48,6 @@ public class Customer {
         this.bday = bDay();
         this.phone = phone();
         this.payment = paymentMethod();
-        this.rentalList = checkRentals();
     }
 
     public void updateCustInfo(){
