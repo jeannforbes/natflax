@@ -1,0 +1,22 @@
+INSERT INTO Employee SELECT * FROM CSVREAD('../../Test_Data/Employee_fakeData.csv');
+
+INSERT INTO Customer SELECT * FROM CSVREAD('../../Test_Data/Customer_fakeData.csv');
+
+INSERT INTO Payment SELECT * FROM CSVREAD('../../Test_Data/Payment_fakeData.csv');
+
+INSERT INTO Store SELECT * FROM CSVREAD('../../Test_Data/Store_fakeData.csv');
+
+INSERT INTO Book SELECT * FROM CSVREAD('../../Test_Data/Book_fakeData.csv');
+
+INSERT INTO Movie SELECT * FROM CSVREAD('../../Test_Data/Movie_fakeData.csv');
+
+
+INSERT INTO Rented_Books SELECT * FROM CSVREAD('../../Test_Data/rented_books_fakeData.csv');
+
+INSERT INTO Rented_Movies SELECT * FROM CSVREAD('../../Test_Data/rented_movies_fakeData.csv');
+
+INSERT INTO Books_in_Stock SELECT * FROM CSVREAD('../../Test_Data/stock_books_fakeData.csv');
+
+INSERT INTO Movies_in_Stock SELECT * FROM CSVREAD('../../Test_Data/stock_movies_fakeData.csv');
+
+INSERT INTO Works_for SELECT * FROM CSVREAD('../../Test_Data/works_for.csv');
