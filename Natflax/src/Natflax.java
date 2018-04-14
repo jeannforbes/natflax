@@ -10,14 +10,14 @@ public class Natflax {
         //Connection conn = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
         //Statement statement = conn.createStatement();
         //statement.executeQuery("SELECT * FROM Employees");
-/*        Connection conn = connectToDatabase(
+        Connection conn = connectToDatabase(
                 "jdbc:h2:~/test",
-                "sa",
-                "");
+                "natflax",
+                "admin");
 
-        ResultSet result = queryDB(conn, "SELECT * FROM Employees");
+        ResultSet result = queryDB(conn, "SELECT * FROM Employee");
         System.out.println(result);
-*/
+
         store = new Store("1","123 place","(132)123-1593","123-45-6789",
                 new ArrayList<>(), new ArrayList<>(), new ArrayList<>() );
         startDBQuery();
@@ -36,7 +36,41 @@ public class Natflax {
         Statement statement = conn.createStatement();
         return statement.executeQuery(query);
     }
+    
+    public static void printResultSet(ResultSet result)
+            throws Exception
+    {
+        if(result.first() == false)
+        {
+            System.out.println("No tuples found");
+        }
+        else
+        {
+            // Gather column information of the results:
+            ResultSetMetaData meta_data = result.getMetaData();
+            int columns = meta_data.getColumnCount();
 
+            // Create a format string based on the column width of each result column
+            String[] format = new String[columns];
+            for(int i = 0; i < columns; i++)
+            {
+                format[i] = "%-" + (meta_data.getColumnDisplaySize(i+1) + 1) + "s";
+                System.out.format(format[i], meta_data.getColumnName(i+1));
+            }
+            System.out.print("\n");
+            
+            // Print out every single tuple of the query
+            do
+            {
+                for(int i = 0; i < columns; i++)
+                {
+                    System.out.format(format[i], result.getString(i+1));
+                }
+                System.out.print("\n");
+            } while(result.next() != false);
+        }
+    }
+    
     private static void startDBQuery(){
         System.out.println("Welcome to NATFLAX!\n" +
                 "Are you a(n):\n" +
