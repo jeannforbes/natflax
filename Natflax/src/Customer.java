@@ -1,3 +1,4 @@
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -206,22 +207,73 @@ public class Customer {
         return this.rentalList;
     }
 
-    public void checkOut(String[] results){
-        Scanner in = new Scanner(System.in);
-        System.out.println("Which result would you like to check out?\n" +
-                "-1 to cancel");
-        for (int i = 0; i < results.length; i++) {
-            System.out.println(i+"-"+results[i]);
+    public void checkOut(String type)
+            throws Exception{
+        String item_key, table, stock_table, rent_table;
+        if(type.equalsIgnoreCase("movie"))
+        {
+            item_key = "ISAN";
+            table = "Movie";
+            stock_table = "Movies_in_stock";
+            rent_table = "rented_movies";
         }
+        else
+        {
+            item_key = "ISBN";
+            table = "Book";
+            stock_table = "Books_in_stock";
+            rent_table = "rented_books";
+        }
+        Scanner in = new Scanner(System.in);
+        System.out.println("Enter the " + type + "'s " + item_key + "(-1 to cancel):");
+
         try{
-            int rent = in.nextInt();
-            if(rent == -1) return;
-            this.rentalList.add(results[rent]);
-            //SQL UPDATE Stock, cust rentals
-            System.out.println(results[rent]+" has been added to your list of rentals");
+            String item = in.next();
+            if(item.equals("-1")) return;
+            
+            ResultSet item_query = Database.queryDB("SELECT " + table + ".* from " + table + " natural join " + stock_table + " where stock > 0 and " + table + "." + item_key + " = '" + item + "'");
+            // Item was found - ask them to pick a store to rent from
+            if(item_query.first() == true)
+            {
+                ResultSet already_renting = Database.queryDB("SELECT * FROM " + rent_table + " WHERE CID = '" + this.CID + "' and " + item_key + " = '" + item +"'");
+                if(already_renting.next() == true)
+                {
+                    System.out.println("You're already renting a copy of that " + type + ".");
+                    return;
+                }
+                System.out.println("List of stores with that have that " + type +":");
+                ResultSet store_query = Database.queryDB("SELECT Store.* from Store natural join " + stock_table + " where stock > 0 and " + item_key + " = '" + item + "'");
+                boolean valid_query = Database.printResultSet(store_query);
+                
+                System.out.println("\nWhich store would you like to rent from (Enter SID):");
+                String store_id;
+                do
+                {
+                    if(valid_query == false)
+                    {
+                        System.out.println("Store not found. Enter SID: ");
+                    }
+                    store_id = in.next();
+                    store_query = Database.queryDB("SELECT * from " + stock_table + " where stock > 0 and SID = '" + store_id + "' and " + item_key + " = '" + item + "'");
+                }
+                while((valid_query = store_query.first()) == false);
+                
+                Database.updateDB("INSERT INTO " + rent_table + "(CID, " + item_key + ",SID, rented_date) " +
+                                 "values ('" + this.CID + "','" + item +"','" + store_id + "', GETDATE());");
+                Database.updateDB("UPDATE " +  stock_table + " SET stock = stock - 1 WHERE " + 
+                                 item_key + " = '" + item + "' and SID = '" + store_id + "'");
+                // Rent the book from the store
+                //System.out.println(results[rent]+" has been added to your list of rentals");
+            }
+            else
+            {
+                // Item not found
+                System.out.println("The " + type + " you've requested is not available\n");
+                checkOut(type);
+            }
         }catch(InputMismatchException e){
             System.out.println("Input not in correct format, try again.");
-            checkOut(results);
+            checkOut(type);
         }
     }
 }

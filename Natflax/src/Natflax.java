@@ -16,13 +16,10 @@ public class Natflax {
                 "natflax",
                 "admin");
 
-        ResultSet result = Database.queryDB("SELECT * FROM Employee");
-
         store = new Store("1","123 place","(132)123-1593","123-45-6789",
                 new ArrayList<>(), new ArrayList<>(), new ArrayList<>() );
         startDBQuery();
         Database.close();
-//        conn.close();
     }
     
     private static void startDBQuery()
@@ -58,7 +55,8 @@ public class Natflax {
         }
     }
 
-    private static void CreateNewCustomer() {
+    private static void CreateNewCustomer()
+        throws Exception {
         System.out.println("Welcome! Please fill out some basic information.");
         Customer c = new Customer();
         customerActions(c);//for now
@@ -164,41 +162,33 @@ public class Natflax {
         }
     }
 
-    private static void customerActions(Customer c) {
+    private static void customerActions(Customer c) 
+        throws Exception {
         System.out.println("What can we help you with?:\n" +
-                "\t1-Search\n" +
-                "\t2-Edit Information\n" +
-                "\t3-Check Rentals\n" +
-                "\t4-Quit");
+                "\t1-Search Books\n" +
+                "\t2-Search Movies\n" +
+                "\t3-Edit Information\n" +
+                "\t4-Check Rentals\n" +
+                "\t5-Quit");
         Scanner in = new Scanner(System.in);
         try{
             int action = in.nextInt();
             switch (action) {
                 case (1):
-                    System.out.println("Input search keyword:");
-                    String search = in.next();
-                    //SQL search (search) FROM BOOKS, MOVIES = results, limit to 10 results bc its easier, or not just
-                    //change that later
-                    String[] results = new String[]{"book1","book2","book3"};
-                    System.out.println("I searched for:" + search + "\n");//
-                    System.out.println("Would you like to check out a title? (yes/no)");
-                    String response = in.next();
-                    if(response.equals("yes"))
-                        c.checkOut(results);
-                    else if(response.equals("no"))
-                        customerActions(c);
-                    else System.out.println("not recognized, assuming no");
-                        customerActions(c);
+                    beginRental(c, "book");
                     break;
                 case (2):
+                    beginRental(c, "movie");
+                    break;
+                case (3):
                     c.updateCustInfo();
                     customerActions(c);
                     break;
-                case (3):
+                case (4):
                     c.checkRentals();
                     customerActions(c);
                     break;
-                case (4):
+                case (5):
                     System.out.println("Goodbye!");
                     break;
                 default:
@@ -209,6 +199,62 @@ public class Natflax {
         }catch (InputMismatchException e){
             System.out.println("Input not in right format, try again.");
             customerActions(c);
+        }
+    }
+    private static void beginRental(Customer c, String type)
+            throws Exception
+    {
+        String table, stock_table;
+        if(type.equalsIgnoreCase("movie"))
+        {
+            table = "Movie";
+            stock_table = "Movies_in_stock";
+        }
+        else
+        {
+            table = "Book";
+            stock_table = "Books_in_stock";
+        }
+
+        Scanner in = new Scanner(System.in);
+        System.out.println("Input search keyword:");
+        
+        String search = in.next();
+        ResultSet item_query = Database.queryDB("SELECT " + table + ".* from " + table + " natural join " + stock_table + " where stock > 0 and title like '%" + search + "%'");
+
+        if(Database.printResultSet(item_query) == false)
+        {
+            // Could not find any books in stock
+            item_query = Database.queryDB("SELECT * from " + table + " where title like '%" + search + "%'");
+            if(item_query.first() == true)
+            {
+                Database.printResultSet(item_query);
+                System.out.println("The above " + type + "s were found, but not in stock.\n");
+            }
+            else
+            {
+                System.out.println("No " + type + "s were found with a title like that.\n");
+            }
+            customerActions(c);
+        }
+        else
+        {
+            System.out.println("\nWould you like to check out a title? (yes/no)");
+            String response = in.next();
+            if(response.equals("yes"))
+            {
+                c.checkOut(type);
+                customerActions(c);
+            }
+            else if(response.equals("no"))
+            {
+                customerActions(c);
+            }
+            else 
+            {
+                System.out.println("not recognized, assuming no");
+                customerActions(c);
+            }
         }
     }
 
