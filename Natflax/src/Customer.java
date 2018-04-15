@@ -1,15 +1,13 @@
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Customer {
 
     private String CID, user, password, name[], address, bday, phone, payment[];
-    public ArrayList<String> rentalList;
 
     public Customer(String CID, String user, String password, String fname, String lname, String address, String bday,
-                    String phone, String cc, String ccExp, String ccPin, String ccSec, ArrayList<String> rentalList){
+                    String phone, String cc, String ccExp, String ccPin, String ccSec){
         this.CID = CID;
         this.user = user;
         this.password = password;
@@ -18,7 +16,6 @@ public class Customer {
         this.bday = bday;
         this.phone = phone;
         this.payment = new String[]{cc,ccExp,ccPin,ccSec};
-
     }
     public Customer(String[] info, String[] cc_info){
         this.CID = info[0];
@@ -29,7 +26,6 @@ public class Customer {
         this.phone = info[5];
         this.name = new String[]{info[6],info[7]};
         this.payment = new String[]{cc_info[0],cc_info[1],cc_info[2],cc_info[3]};
-        
     }
     public Customer(String[] info){
         this.CID = info[0];
@@ -309,6 +305,9 @@ public class Customer {
             stock_table = "Books_in_stock";
             rent_table = "rented_books";
         }
+        // Here's where a well architected codebase would do
+        // if this.payment == NULL.  But payment isn't always loaded into
+        // the class on startup so that's not guarenteed.
         ResultSet payment_query = Database.queryDB("Select * from Payment where CID = '" + this.CID + "';");
         if(payment_query.isBeforeFirst() == false)
         {

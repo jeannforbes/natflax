@@ -28,20 +28,19 @@ public class Natflax {
                 "Are you a(n):\n" +
                 "\t1-Customer\n" +
                 "\t2-Employee\n" +
-                "\t3-Manager\n" +
-                "\t4-New\n" +
-                "\t5-Quit");
+                "\t3-New\n" +
+                "\t4-Quit");
         Scanner in = new Scanner(System.in);
         try {
             int login = in.nextInt();
-            if(login == 1 | login == 2 | login == 3)
+            if(login == 1 | login == 2)
                 login(login);
             switch(login){
-                case(4):
+                case(3):
                     //Create new login
                     CreateNewCustomer();
                     break;
-                case(5):
+                case(4):
                     System.out.println("Goodbye!");
                     break;
                 default:
@@ -110,14 +109,43 @@ public class Natflax {
                     }
                     break;
                 case(2):
-                    Employee sampleE = new Employee("123-45-6789","user","password","Fname","Lname",
-                            "123 Sample St, Place JE, 12345","(123)456-7890","1");
-                    employeeActions(sampleE);
-                    break;
-                case(3):
-                    Employee sampleM = new Employee("123-45-6789","user","password","Fname","Lname",
-                        "123 Sample St, Place JE, 12345","(123)456-7890","1");
-                    managerActions(sampleM);
+                    ResultSet employee_query = Database.queryDB("SELECT * FROM Employee WHERE ID = '" + user + "'");
+                    if(employee_query.first() == false)
+                    {
+                        System.out.println("Login failed - employee ID " + user + " not found");
+                        login(action);
+                    }
+                    else
+                    {
+                        Employee sampleE;
+                        int columns = employee_query.getMetaData().getColumnCount();
+                        String[] info = new String[columns];
+                        for(int i = 0; i < columns; i++)
+                        {
+                            info[i] = employee_query.getString(i+1);
+                        }
+                        // Find the store ID
+                        ResultSet store_query = Database.queryDB("SELECT SID FROM Works_for WHERE ID = '" + user + "'");
+                        if(store_query.first() == true)
+                        {
+                            String SID = store_query.getString(1);
+                            sampleE = new Employee(info, SID);
+                            
+                            ResultSet manager_query = Database.queryDB("Select Manager_ID from Store where Manager_ID = '" + user + "';");
+                            if(manager_query.isBeforeFirst())
+                            {
+                                managerActions(sampleE);
+                            }
+                            else
+                            {
+                                employeeActions(sampleE);
+                            }
+                        }
+                        else
+                        {
+                            System.out.println("Critical error: Employee does not work for a store!");
+                        }
+                    }
                     break;
             }
         }catch (InputMismatchException e){
@@ -126,20 +154,28 @@ public class Natflax {
         }
     }
 
-    private static void managerActions(Employee m){
+    private static void managerActions(Employee m)
+        throws Exception{
         System.out.println("What would you like to do?\n" +
                 "\t1-Return book\n" +
-                "\t2-Add book\n" +
-                "\t3-Edit Information\n" +
-                "\t4-Add Employee\n" +
-                "\t5-Fire Employee\n" +
-                "\t6-Quit");
+                "\t2-Return movie\n" +
+                "\t3-Add book\n" +
+                "\t4-Add movie\n" +
+                "\t5-Edit Information\n" +
+                "\t6-Add Employee\n" +
+                "\t7-Promote Employee\n" +
+                "\t8-Fire Employee\n" +
+                "\t9-Quit");
         Scanner in = new Scanner(System.in);
         int action = in.nextInt();
         switch(action){
             case(1):
+                m.returnItem("book");
+                managerActions(m);
                 break;
             case(2):
+                m.returnItem("movie");
+                managerActions(m);
                 break;
             case(3):
                 break;
@@ -149,11 +185,11 @@ public class Natflax {
                 store.employees.add(e);
                 break;
             case(5):
-                System.out.println("Enter ssn of Employee to fire:");
+                System.out.println("Enter ID of Employee to fire:");
                 //SQL SELECT Employee with that ssn = e
 //                store.employees.remove(e);
                 break;
-            case(6):
+            case(9):
                 System.out.println("Goodbye!");
                 break;
             default:
@@ -260,22 +296,30 @@ public class Natflax {
     }
 
 
-    private static void employeeActions(Employee e){
+    private static void employeeActions(Employee e)
+        throws Exception{
         System.out.println("What would you like to do?\n" +
                 "\t1-Return book\n" +
-                "\t2-Add book\n" +
-                "\t3-Edit Information\n" +
-                "\t4-Quit");
+                "\t2-Return movie\n" +
+                "\t3-Add book\n" +
+                "\t4-Add movie\n" +
+                "\t5-Edit Information\n" +
+                "\t6-Quit");
         Scanner in = new Scanner(System.in);
         int action = in.nextInt();
         switch(action){
             case(1):
+                e.returnItem("book");
+                employeeActions(e);
                 break;
             case(2):
+                e.returnItem("movie");
+                employeeActions(e);
                 break;
-            case(3):
+            case(5):
+                e.addBook();
                 break;
-            case(4):
+            case(6):
                 System.out.println("Goodbye!");
                 break;
             default:
@@ -283,5 +327,9 @@ public class Natflax {
                 employeeActions(e);
                 break;
         }
+    }
+    private static void beginReturn(Employee e, String type)
+    {
+
     }
 }
