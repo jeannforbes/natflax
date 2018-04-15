@@ -28,7 +28,7 @@ public class Database {
     public static boolean printResultSet(ResultSet result)
             throws Exception
     {
-        if(result.next() == false)
+        if(result.first() == false)
         {
             return false;
         }

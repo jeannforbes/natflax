@@ -90,6 +90,7 @@ public class Natflax {
                         {
                             info[i] = user_query.getString(i+1);
                         }
+                        
                         ResultSet cc_query = Database.queryDB("SELECT P.ccNumber, P.ccExpiration, P.ccPIN, P.ccSecurity FROM Customer natural join Payment as P WHERE Customer.username = '" + user + "'");
                         if(cc_query.first() == true)
                         {
@@ -220,7 +221,7 @@ public class Natflax {
         System.out.println("Input search keyword:");
         
         String search = in.next();
-        ResultSet item_query = Database.queryDB("SELECT " + table + ".* from " + table + " natural join " + stock_table + " where stock > 0 and title like '%" + search + "%'");
+        ResultSet item_query = Database.queryDB("SELECT distinct " + table + ".* from " + table + " natural join " + stock_table + " where stock > 0 and title like '%" + search + "%'");
 
         if(Database.printResultSet(item_query) == false)
         {

@@ -83,9 +83,9 @@ public class Employee {
     }
 
     public void returnBook(Customer c, String title){
-        if(c.checkRentals().contains(title)){
+        /*if(c.checkRentals().contains(title)){
             c.rentalList.remove(title);
-        }
+        }*/
     }
 
     public void addBook(){
