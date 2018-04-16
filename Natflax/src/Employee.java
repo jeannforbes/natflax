@@ -172,8 +172,8 @@ public class Employee {
             table = "Movie";
             stock_table = "Movies_in_stock";
             rent_table = "rented_movies";
-            author_type = "author";
-            release = "yearpublish";
+            author_type = "director";
+            release = "yearrelease";
         }
         else
         {
@@ -181,8 +181,8 @@ public class Employee {
             table = "Book";
             stock_table = "Books_in_stock";
             rent_table = "rented_books";
-            author_type = "director";
-            release = "yearrelease";
+            author_type = "author";
+            release = "yearpublish";
         }
 
         Scanner in = new Scanner(System.in);
@@ -216,6 +216,17 @@ public class Employee {
             Database.updateDB("update " + table + " set title = '" + title + "', " + author_type + " = '" + author +"', " +
                                 release + " = " + year + ", rentfee = " + rental + ", replacefee = " + replace +
                                 " where " + item_key + " = '" + key + "';");
+        }
+        ResultSet query_stock = Database.queryDB("Select * FROM " + stock_table + " where " + item_key + " = '" + key + "';");
+        if(query_stock.isBeforeFirst() == false)
+        {
+            // Stock tuple did not exist:
+            Database.updateDB("INSERT Into " + stock_table + "(" + item_key + ",SID,stock) values ('" + key + "','" + this.store + "'," + stock + ");");
+        }
+        else
+        {
+            // Stock tuple did exist, update it:
+            Database.updateDB("UPDATE " + stock_table + " set stock = " + stock + " where " + item_key + " = '" + key + "' and SID = '" + this.store + "';");
         }
     }
 
