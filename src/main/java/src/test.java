@@ -88,9 +88,10 @@ public class test {
 
     public static void Customer(Connection conn, String cid) throws Exception {
         String CID = cid;
-        String search = null;
+        String ISAN, ISBN, rented_date, author, director, title, search;
+        int action = 0, SID = 1;
+
         ResultSet rs = null;
-        int action = 0;
 
         System.out.println("Welcome, customer!\n  What can we help you with?:\n" +
                 "\t1-Search for a book\n" +
@@ -111,16 +112,38 @@ public class test {
                         search = in.nextLine();
                         rs = queryDB(conn,"SELECT * FROM Book WHERE title='"+search+"'");
                         if(rs.next()){
-                            String author = rs.getString("AUTHOR");
-                            String title = rs.getString("TITLE");
-                            System.out.println("Do you want to rent a copy of "+title+" by "+author+"?\n"+
-                                    "\t1 - yes\n"+
-                                    "\t2 - no\n");
+                            ISBN = rs.getString("ISBN");
+                            author = rs.getString("AUTHOR");
+                            title = rs.getString("TITLE");
+                            // Do we have any in stock?
+                            rs = queryDB(conn, "SELECT SID FROM books_in_stock WHERE ISBN='"+ISBN+"' AND stock>0");
+                            // If we have it in stock, ask if they want to rent
+                            if(rs.next()){
+                                System.out.println("Do you want to rent a copy of "+title+" by "+author+"?\n"+
+                                        "\t1 - yes\n"+
+                                        "\t2 - no\n");
+                            }
+                            // Otherwise, we're done.
+                            else {
+                                System.out.println(title+" by "+author+" is out of stock.");
+                                break;
+                            }
+                            SID = rs.getInt("SID");
                             action = in.nextInt();
+
+                            /* YES - we want to rent the book! */
                             switch(action){
                                 case 1:
-                                    System.out.println("You rented "+title+" by "+author+".");
-                                    // Rent it!
+                                    ISBN = rs.getString("ISBN");
+                                    rented_date = formatter.format(new Date());
+                                    // Insert this book into rented_books
+                                    boolean insertResult = executeDB(conn, "INSERT INTO rented_books (CID, ISBN, SID, rented_date) "+
+                                            "VALUES ('"+CID+"','"+ISBN+"','"+SID+"','"+rented_date+"')");
+                                    // Reduce stock of this book by one
+                                    //boolean updateResult = executeDB(conn, "UPDATE stock_books SET stock=stock-1 WHERE ISBN='"+ISBN+"'");
+                                    if(insertResult)
+                                        System.out.println("There was an issue renting this book.  Try again later!");
+                                    else System.out.println("You rented "+title+" by "+author+".");
                                     break;
                                 case 2:
                                     System.out.println("Have a nice day!");
@@ -133,26 +156,39 @@ public class test {
                         break;
                     case(2): // Search by author
                         System.out.print("Enter the author:");
-                        in.nextLine();
+                        in.nextLine(); // needed so we don't accidentally skip
                         search = in.nextLine();
                         rs = queryDB(conn,"SELECT * FROM Book WHERE author='"+search+"'");
                         if(rs.next()){
-                            String author = rs.getString("AUTHOR");
-                            String title = rs.getString("TITLE");
-                            System.out.println("Do you want to rent a copy of "+title+" by "+author+"?\n"+
-                                    "\t1 - yes\n"+
-                                    "\t2 - no\n");
+                            ISBN = rs.getString("ISBN");
+                            author = rs.getString("AUTHOR");
+                            title = rs.getString("TITLE");
+                            // Do we have any in stock?
+                            rs = queryDB(conn, "SELECT SID FROM books_in_stock WHERE ISBN='"+ISBN+"' AND stock>0");
+                            // If we have it in stock, ask if they want to rent
+                            if(rs.next()){
+                                System.out.println("Do you want to rent a copy of "+title+" by "+author+"?\n"+
+                                        "\t1 - yes\n"+
+                                        "\t2 - no\n");
+                            }
+                            // Otherwise, we're done.
+                            else {
+                                System.out.println(title+" by "+author+" is out of stock.");
+                                break;
+                            }
+                            SID = rs.getInt("SID");
                             action = in.nextInt();
                             switch(action){
                                 case 1:
-                                    System.out.println("You rented "+title+" by "+author+".");
-                                    String ISBN = rs.getString("ISBN");
-                                    int SID = 1;
-                                    String rented_date = formatter.format(new Date());
+                                    ISBN = rs.getString("ISBN");
+                                    rented_date = formatter.format(new Date());
                                     // Rent it!
-                                    boolean result = executeDB(conn, "INSERT INTO rented_books (CID, ISBN, SID, rented_date) "+
+                                    boolean insertResult = executeDB(conn, "INSERT INTO rented_books (CID, ISBN, SID, rented_date) "+
                                         "VALUES ('"+CID+"','"+ISBN+"','"+SID+"','"+rented_date+"')");
-                                    if(result) System.out.println("There was an issue renting this book.  Try again later!");
+                                    //boolean updateResult = executeDB(conn, "UPDATE books_in_stock SET stock=stock-1 WHERE ISBN='"+ISBN+"'");
+                                    if(insertResult)
+                                        System.out.println("There was an issue renting this book.  Try again later!");
+                                    else System.out.println("You rented "+title+" by "+author+".");
                                     break;
                                 case 2:
                                     System.out.println("Have a nice day!");
@@ -177,16 +213,36 @@ public class test {
                         search = in.nextLine();
                         rs = queryDB(conn,"SELECT * FROM Movie WHERE title='"+search+"'");
                         if(rs.next()){
-                            String director = rs.getString("DIRECTOR");
-                            String title = rs.getString("TITLE");
-                            System.out.println("Do you want to rent a copy of "+title+" by "+director+"?\n"+
-                                    "\t1 - yes\n"+
-                                    "\t2 - no\n");
+                            ISAN = rs.getString("ISAN");
+                            director = rs.getString("DIRECTOR");
+                            title = rs.getString("TITLE");
+                            // Do we have any in stock?
+                            rs = queryDB(conn, "SELECT SID FROM movies_in_stock WHERE ISAN='"+ISAN+"' AND stock>0");
+                            // If we have it in stock, ask if they want to rent
+                            if(rs.next()){
+                                System.out.println("Do you want to rent a copy of "+title+" by "+director+"?\n"+
+                                        "\t1 - yes\n"+
+                                        "\t2 - no\n");
+                            }
+                            // Otherwise, we're done.
+                            else {
+                                System.out.println(title+" by "+director+" is out of stock.");
+                                break;
+                            }
+                            SID = rs.getInt("SID");
+                            in.nextLine();
                             action = in.nextInt();
                             switch(action){
                                 case 1:
-                                    System.out.println("You rented "+title+" by "+director+".");
+                                    ISAN = rs.getString("ISBN");
+                                    rented_date = formatter.format(new Date());
                                     // Rent it!
+                                    boolean insertResult = executeDB(conn, "INSERT INTO rented_movies (CID, ISAN, SID, rented_date) "+
+                                            "VALUES ('"+CID+"','"+ISAN+"','"+SID+"','"+rented_date+"')");
+                                    //boolean updateResult = executeDB(conn, "UPDATE movies_in_stock SET stock=stock-1 WHERE ISAN='"+ISAN+"'");
+                                    if(insertResult)
+                                        System.out.println("There was an issue renting this movie.  Try again later!");
+                                    else System.out.println("You rented "+title+" by "+director+".");
                                     break;
                                 case 2:
                                     System.out.println("Have a nice day!");
@@ -197,21 +253,42 @@ public class test {
                         }
                         else System.out.println("We don't have a movie by that title.");
                         break;
+
                     case(2): // Search by author
                         System.out.println("Enter the director:");
+                        in.nextLine();
                         search = in.nextLine();
                         rs = queryDB(conn,"SELECT * FROM Movie WHERE director='"+search+"'");
                         if(rs.next()){
-                            String director = rs.getString("DIRECTOR");
-                            String title = rs.getString("TITLE");
-                            System.out.println("Do you want to rent a copy of "+title+" by "+director+"?\n"+
-                                    "\t1 - yes\n"+
-                                    "\t2 - no\n");
+                            ISAN = rs.getString("ISAN");
+                            director = rs.getString("DIRECTOR");
+                            title = rs.getString("TITLE");
+                            // Do we have any in stock?
+                            rs = queryDB(conn, "SELECT SID FROM movies_in_stock WHERE ISAN='"+ISAN+"' AND stock>0");
+                            // If we have it in stock, ask if they want to rent
+                            if(rs.next()){
+                                System.out.println("Do you want to rent a copy of "+title+" by "+director+"?\n"+
+                                        "\t1 - yes\n"+
+                                        "\t2 - no\n");
+                            }
+                            // Otherwise, we're done.
+                            else {
+                                System.out.println(title+" by "+director+" is out of stock.");
+                                break;
+                            }
+                            SID = rs.getInt("SID");
                             action = in.nextInt();
                             switch(action){
                                 case 1:
-                                    System.out.println("You rented "+title+" by "+director+".");
+                                    ISAN = rs.getString("ISBN");
+                                    rented_date = formatter.format(new Date());
                                     // Rent it!
+                                    boolean insertResult = executeDB(conn, "INSERT INTO rented_movies (CID, ISAN, SID, rented_date) "+
+                                            "VALUES ('"+CID+"','"+ISAN+"','"+SID+"','"+rented_date+"')");
+                                    //boolean updateResult = executeDB(conn, "UPDATE movies_in_stock SET stock=stock-1 WHERE ISAN='"+ISAN+"'");
+                                    if(insertResult)
+                                        System.out.println("There was an issue renting this movie.  Try again later!");
+                                    else System.out.println("You rented "+title+" by "+director+".");
                                     break;
                                 case 2:
                                     System.out.println("Have a nice day!");
@@ -219,7 +296,8 @@ public class test {
                                     break;
 
                             }
-                        } else System.out.println("We don't have a movie by that director.");
+                        }
+                        else System.out.println("We don't have a movie by that title.");
                         break;
                     default:
                         break;
