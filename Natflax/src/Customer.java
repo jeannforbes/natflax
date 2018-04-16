@@ -330,7 +330,7 @@ public class Customer {
                     System.out.println("You're already renting a copy of that " + type + ".");
                     return;
                 }
-                System.out.println("List of stores with that have that " + type +":");
+                System.out.println("List of stores that have that " + type +":");
                 ResultSet store_query = Database.queryDB("SELECT Store.* from Store natural join " + stock_table + " where stock > 0 and " + item_key + " = '" + item + "'");
                 boolean valid_query = Database.printResultSet(store_query);
                 

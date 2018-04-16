@@ -16,8 +16,6 @@ public class Natflax {
                 "natflax",
                 "admin");
 
-        store = new Store("1","123 place","(132)123-1593","123-45-6789",
-                new ArrayList<>(), new ArrayList<>(), new ArrayList<>() );
         startDBQuery();
         Database.close();
     }
@@ -163,9 +161,8 @@ public class Natflax {
                 "\t4-Add movie\n" +
                 "\t5-Edit Information\n" +
                 "\t6-Add Employee\n" +
-                "\t7-Promote Employee\n" +
-                "\t8-Fire Employee\n" +
-                "\t9-Quit");
+                "\t7-Fire Employee\n" +
+                "\t8-Quit");
         Scanner in = new Scanner(System.in);
         int action = in.nextInt();
         switch(action){
@@ -178,18 +175,50 @@ public class Natflax {
                 managerActions(m);
                 break;
             case(3):
+                m.addItem("book");
+                managerActions(m);
                 break;
             case(4):
-                System.out.println("Fill out your information:");
-                Employee e = new Employee();
-                store.employees.add(e);
+                m.addItem("movie");
+                managerActions(m);
                 break;
             case(5):
-                System.out.println("Enter ID of Employee to fire:");
-                //SQL SELECT Employee with that ssn = e
-//                store.employees.remove(e);
+                m.updateEmpInfo();
+                managerActions(m);
                 break;
-            case(9):
+            case(6):
+                System.out.println("Fill out your information:");
+                Employee e = new Employee(m.store);
+                managerActions(m);
+                break;
+            case(7):
+                System.out.println("List of employees that work for your store:");
+                ResultSet employee_query = Database.queryDB("Select E.* from (Employee as E natural join works_for) " +
+                                                            "where SID = '" + m.store + "';");
+                Database.printResultSet(employee_query);
+                System.out.println("Enter ID of Employee to fire (-1 to cancel):");
+                
+                String emp_id;
+                ResultSet query_id;
+                do
+                {
+                    emp_id = in.next();
+                    if(emp_id.equals("-1"))
+                    {
+                        managerActions(m);
+                        return;
+                    }
+                    query_id = Database.queryDB("Select * from Employee where ID = '" + emp_id + "';");
+                    if(query_id.isBeforeFirst() == false)
+                    {
+                        System.out.println("That is not a valid employee ID.");
+                    }
+                }while(query_id.isBeforeFirst() == false);
+                Database.updateDB("Delete from Works_for where ID = '" + emp_id +"';");
+                Database.updateDB("Delete from Employee where ID = '" + emp_id +"';");
+                managerActions(m);
+                break;
+            case(8):
                 System.out.println("Goodbye!");
                 break;
             default:
@@ -263,7 +292,7 @@ public class Natflax {
         {
             // Could not find any books in stock
             item_query = Database.queryDB("SELECT * from " + table + " where title like '%" + search + "%'");
-            if(item_query.first() == true)
+            if(item_query.isBeforeFirst() == true)
             {
                 Database.printResultSet(item_query);
                 System.out.println("The above " + type + "s were found, but not in stock.\n");
@@ -316,8 +345,17 @@ public class Natflax {
                 e.returnItem("movie");
                 employeeActions(e);
                 break;
+            case(3):
+                e.addItem("book");
+                employeeActions(e);
+                break;
+            case(4):
+                e.addItem("movie");
+                employeeActions(e);
+                break;
             case(5):
-                e.addBook();
+                e.updateEmpInfo();
+                employeeActions(e);
                 break;
             case(6):
                 System.out.println("Goodbye!");

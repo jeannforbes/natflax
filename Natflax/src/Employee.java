@@ -3,7 +3,8 @@ import java.sql.ResultSet;
 import java.util.Scanner;
 
 public class Employee {
-    private String ID, name[], phone, hours, wage, store;
+    private String ID, name[], phone, hours, wage;
+    public String store;
 
     Employee(String ID, String fname, String lname, String phone, String hours, String wage, String SID){
         this.ID = ID;
@@ -24,16 +25,22 @@ public class Employee {
         this.store = SID;
     }
 
-    Employee(){
+    Employee(String storeID)
+        throws Exception{
         this.ID = ID();
         this.name = name();
         this.phone = phone();
         this.hours = hours();
         this.wage = wage();
-        this.store = storeID();
+        this.store = storeID;
+        Database.updateDB("Insert into Employee(ID,FIRSTNAME,LASTNAME,PHONE,HOURS,WAGE) "+
+                            " values ('" + this.ID + "','" + this.name[0] + "','" + this.name[1] +
+                            "','" + this.phone + "'," + this.hours + "," + this.wage + ");");
+        Database.updateDB("Insert into Works_for(ID,SID) values ('" + this.ID +"','" + this.store + "');");
     }
 
-    public void updateEmpInfo(){
+    public void updateEmpInfo()
+        throws Exception{
         System.out.println("What info do you want to update?\n" +
                 "\t1-Name\n" +
                 "\t2-Phone Number\n" +
@@ -48,7 +55,7 @@ public class Employee {
                 String[] name = name();
                 this.name = name;
                 System.out.println("Name updated to: "+ name[0]+" "+name[1]);
-                //SQL UPDATE 0 = fname, 1 = lname
+                Database.updateDB("UPDATE Employee SET firstname = '" + name[0] + "', lastname = '" + name[1] + "' WHERE ID = '" + this.ID + "'");
                 updateEmpInfo();
                 break;
             case(2):
@@ -58,7 +65,7 @@ public class Employee {
                 String phone = phone();
                 this.phone = phone;
                 System.out.println("Phone updated: "+phone);
-                //SQL UPDATE phone
+                Database.updateDB("UPDATE Employee SET Phone = '" + phone + "' WHERE ID = '" + this.ID + "'");
                 updateEmpInfo();
                 break;
             case(3):
@@ -156,14 +163,78 @@ public class Employee {
                             item_key + " = '" + item_id + "' and SID = '" + this.store + "'");
     }
 
-    public void addBook(){
-        Book b = new Book();
+    public void addItem(String type)
+        throws Exception{
+        String item_key, table, stock_table, rent_table, release, author_type;
+        if(type.equalsIgnoreCase("movie"))
+        {
+            item_key = "ISAN";
+            table = "Movie";
+            stock_table = "Movies_in_stock";
+            rent_table = "rented_movies";
+            author_type = "author";
+            release = "yearpublish";
+        }
+        else
+        {
+            item_key = "ISBN";
+            table = "Book";
+            stock_table = "Books_in_stock";
+            rent_table = "rented_books";
+            author_type = "director";
+            release = "yearrelease";
+        }
+
+        Scanner in = new Scanner(System.in);
+        System.out.println("Enter " + item_key + ":");
+        String key = in.next();
+        System.out.println("Enter title of " + type + ":");
+        String title = in.next();
+        System.out.println("Enter author name (First):");
+        String author = in.next();
+        System.out.println("Enter author name (Last):");
+        author += " " + in.next();
+        System.out.println("Enter publish year (YYYY):");
+        int year = in.nextInt();
+        System.out.println("Enter rental fee (x.xx):");
+        double rental = in.nextFloat();
+        System.out.println("Enter replacement fee (xx.xx):");
+        double replace = in.nextFloat();
+
+        System.out.println("How many "+type+"s are being added?");
+        int stock = in.nextInt();
+        ResultSet query_item = Database.queryDB("SELECT * FROM " + table + " WHERE " + item_key + " = '" + key + "';");
+        if(query_item.isBeforeFirst() == false)
+        {
+            // Item didn't exist, go ahead and add it
+            Database.updateDB("Insert into " + table + "(" + item_key + ",title,"+author_type+","+release+",rentfee,replacefee) " +
+                                "values ('" + key + "','" + title + "','" + author + "'," + year + "," + rental + "," + replace +");");
+        }
+        else
+        {
+            // Item existed, update it instead
+            Database.updateDB("update " + table + " set title = '" + title + "', " + author_type + " = '" + author +"', " +
+                                release + " = " + year + ", rentfee = " + rental + ", replacefee = " + replace +
+                                " where " + item_key + " = '" + key + "';");
+        }
     }
 
-    private String ID(){
+    private String ID()
+        throws Exception{
         Scanner in = new Scanner(System.in);
         System.out.println("Enter your ID: ");
-        return in.next();
+        String input_id;
+        ResultSet employee_query;
+        do
+        {
+            input_id = in.next();
+            employee_query = Database.queryDB("Select * from Employee where ID = '" + input_id + "'");
+            if(employee_query.isBeforeFirst() == true)
+            {
+                System.out.println("That ID is taken.  Try again: ");
+            }
+        }while(employee_query.isBeforeFirst() == true);
+        return input_id;
     }
 
     private String[] name(){
@@ -183,23 +254,15 @@ public class Employee {
     }
 
     private String hours(){
+        Scanner in = new Scanner(System.in);
         System.out.println("Enter your weekly hours:");
-        String SID ="1";
-        //SQL get store id
-        return SID;
+        return in.next();
     }
     
     private String wage(){
+        Scanner in = new Scanner(System.in);
         System.out.println("Enter your hourly rate:");
-        String SID ="1";
-        //SQL get store id
-        return SID;
-    }
-    
-    private String storeID(){
-        String SID ="1";
-        //SQL get store id
-        return SID;
+        return in.next();
     }
 
 }
