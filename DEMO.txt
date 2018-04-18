@@ -1,0 +1,23 @@
+RENT A BOOK:
+1: Log in as: pgierek2k
+2: Look for book with "S"
+3: Pick Sonsing: 984255803-7
+4: Rent from store 9
+
+
+RETURN A BOOK:
+Log in as employee 10 (manager) or 46, 68, 85 (not manager)
+
+
+FIRE SOMEBODY
+
+ADD A BOOK:
+111111111-1
+Harry_Potter
+J.K. 
+Rowling
+1999
+$2.50
+$20.00
+
+Search for it on that same customer

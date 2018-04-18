@@ -267,14 +267,28 @@ public class Customer {
         throws Exception{
         String[] type = new String[2];
         String[] rent_table = new String[2];
+        String[] author = new String[2];
+        String[] key = new String[2];
+        
+        key[0] = "ISBN";
+        key[1] = "ISAN";
         
         type[0] = "book";
         type[1] = "movie";
+        
+        author[0] = "author";
+        author[1] = "director";
+        
         rent_table[0] = "rented_books";
         rent_table[1] = "rented_movies";
+        
         for(int i = 0; i < 2; i++)
         {
-            ResultSet rentals = Database.queryDB("SELECT * FROM " + rent_table[i] + " WHERE CID = '" + this.CID + "'");
+            ResultSet rentals;
+            rentals = Database.queryDB("SELECT " + type[i] + "." + key[i] + "," + type[i] + ".title," + 
+                                        type[i] + "." + author[i] + "," + rent_table[i] + ".rented_date," +
+                                        "STORE.SID, STORE.address FROM (" + rent_table[i] + " natural join " + type[i] + 
+                                        ") natural join STORE WHERE CID = '" + this.CID + "'");
             if(rentals.isBeforeFirst() == true)
             {
                 System.out.println("\nYou currently have these " + type[i] + "s rented:");
