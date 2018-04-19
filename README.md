@@ -23,4 +23,5 @@ CREATE TABLE Books_in_Stock(ISBN nchar(13), SID varchar(50), stock integer NOT N
 
 CREATE TABLE Movies_in_Stock(ISAN nchar(13), SID varchar(50), stock integer NOT NULL, FOREIGN KEY (ISAN) REFERENCES Movie(ISAN), FOREIGN KEY (SID) REFERENCES Store(SID), PRIMARY KEY(ISAN,SID));
 
-CREATE TABLE Works_for(ID varchar(50), SID varchar(50), FOREIGN KEY (ID) REFERENCES Employee(ID), FOREIGN KEY (SID) REFERENCES Store(SID), PRIMARY KEY(ID));```
+CREATE TABLE Works_for(ID varchar(50), SID varchar(50), FOREIGN KEY (ID) REFERENCES Employee(ID), FOREIGN KEY (SID) REFERENCES Store(SID), PRIMARY KEY(ID));
+```
